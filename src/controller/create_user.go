@@ -1,19 +1,45 @@
 package controller
 
 import (
-	"fmt"
+	"net/http"
 
+	"github.com/Alan-Gomes1/go-api/src/configuration/logger"
 	"github.com/Alan-Gomes1/go-api/src/configuration/validation"
 	"github.com/Alan-Gomes1/go-api/src/controller/model/request"
+	"github.com/Alan-Gomes1/go-api/src/model"
+	"github.com/Alan-Gomes1/go-api/src/model/service"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
+
+var UserDomainInterface model.UserDomainInterface
 
 func CreateUser(c *gin.Context) {
 	var userRequest request.UserRequest
 	if err := c.ShouldBindJSON(&userRequest); err != nil {
+		logger.Error(
+			"Error trying to validate user info", err,
+			zap.String("caller", "CreateUser"),
+		)
 		restErr := validation.ValidateUserError(err)
 		c.JSON(restErr.Code, restErr)
 		return
 	}
-	fmt.Println("User created successfully:", userRequest)
+
+	domain := model.NewUserDomain(
+		userRequest.Email,
+		userRequest.Password,
+		userRequest.Name,
+		userRequest.Age,
+	)
+	service := service.NewUserDomainService()
+	if err := service.CreateUser(domain); err != nil {
+		logger.Error(
+			"Error trying to create user", err,
+			zap.String("caller", "CreateUser"),
+		)
+		c.JSON(err.Code, err)
+		return
+	}
+	c.JSON(http.StatusOK, domain)
 }
