@@ -7,14 +7,14 @@ import (
 	"github.com/Alan-Gomes1/go-api/src/configuration/validation"
 	"github.com/Alan-Gomes1/go-api/src/controller/model/request"
 	"github.com/Alan-Gomes1/go-api/src/model"
-	"github.com/Alan-Gomes1/go-api/src/model/service"
+	"github.com/Alan-Gomes1/go-api/src/view"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
 var UserDomainInterface model.UserDomainInterface
 
-func CreateUser(c *gin.Context) {
+func (u *userControllerInterface) CreateUser(c *gin.Context) {
 	var userRequest request.UserRequest
 	if err := c.ShouldBindJSON(&userRequest); err != nil {
 		logger.Error(
@@ -32,8 +32,7 @@ func CreateUser(c *gin.Context) {
 		userRequest.Name,
 		userRequest.Age,
 	)
-	service := service.NewUserDomainService()
-	if err := service.CreateUser(domain); err != nil {
+	if err := u.service.CreateUser(domain); err != nil {
 		logger.Error(
 			"Error trying to create user", err,
 			zap.String("caller", "CreateUser"),
@@ -41,5 +40,5 @@ func CreateUser(c *gin.Context) {
 		c.JSON(err.Code, err)
 		return
 	}
-	c.JSON(http.StatusOK, domain)
+	c.JSON(http.StatusOK, view.ConvertDomainToResponse(domain))
 }
