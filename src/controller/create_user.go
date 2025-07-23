@@ -32,7 +32,8 @@ func (u *userControllerInterface) CreateUser(c *gin.Context) {
 		userRequest.Name,
 		userRequest.Age,
 	)
-	if err := u.service.CreateUser(domain); err != nil {
+	domainResult, err := u.service.CreateUserServices(domain)
+	if err != nil {
 		logger.Error(
 			"Error trying to create user", err,
 			zap.String("caller", "CreateUser"),
@@ -40,5 +41,11 @@ func (u *userControllerInterface) CreateUser(c *gin.Context) {
 		c.JSON(err.Code, err)
 		return
 	}
-	c.JSON(http.StatusOK, view.ConvertDomainToResponse(domain))
+
+	logger.Info(
+		"User created successfully",
+		zap.String("userID", domainResult.GetID()),
+		zap.String("caller", "CreateUser"),
+	)
+	c.JSON(http.StatusOK, view.ConvertDomainToResponse(domainResult))
 }
