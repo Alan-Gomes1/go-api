@@ -15,15 +15,13 @@ import (
 func (u *userRepository) CreateUser(
 	userDomain model.UserDomainInterface,
 ) (model.UserDomainInterface, *rest_err.Errors) {
+	caller := zap.String("caller", "userRepository.CreateUser")
 	collectionName := os.Getenv(MONGODB_USER_COLLECTION)
 	collection := u.databaseConnection.Collection(collectionName)
 	value := converter.ConvertDomainToEntity(userDomain)
 	result, err := collection.InsertOne(context.Background(), value)
 	if err != nil {
-		logger.Error(
-			"Error trying to create user", err,
-			zap.String("caller", "userRepository.CreateUser"),
-		)
+		logger.Error("Error trying to create user", err, caller)
 		return nil, rest_err.NewInternalServerError(err.Error())
 	}
 	value.ID = result.InsertedID.(primitive.ObjectID)
