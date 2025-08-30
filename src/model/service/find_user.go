@@ -16,3 +16,9 @@ func (u *userDomainService) FindUserByEmailServices(
 ) (model.UserDomainInterface, *rest_err.Errors) {
 	return u.userRepository.FindUserByEmail(email)
 }
+
+func (u *userDomainService) findUserByEmailAndPasswordServices(
+	email, password string,
+) (model.UserDomainInterface, *rest_err.Errors) {
+	return u.userRepository.FindUserByEmailAndPassword(email, password)
+}

@@ -51,7 +51,7 @@ func (u *userRepository) FindUserByID(id string) (
 	return userDomain, nil
 }
 
-func (u *userRepository) FindUserByEmail(email string,) (
+func (u *userRepository) FindUserByEmail(email string) (
 	model.UserDomainInterface, *rest_err.Errors,
 ) {
 	collectionName := os.Getenv(MONGODB_USER_COLLECTION)
@@ -74,6 +74,32 @@ func (u *userRepository) FindUserByEmail(email string,) (
 			errorMessage, err,
 			zap.String("caller", "userRepository.FindUserByEmail"),
 		)
+		return nil, rest_err.NewInternalServerError(errorMessage)
+	}
+	return converter.ConvertEntityToDomain(*userEntity), nil
+}
+
+func (u *userRepository) FindUserByEmailAndPassword(email, password string) (
+	model.UserDomainInterface, *rest_err.Errors,
+) {
+	caller := zap.String("caller", "userRepository.FindUserByEmailAndPassword")
+	collectionName := os.Getenv(MONGODB_USER_COLLECTION)
+	collection := u.databaseConnection.Collection(collectionName)
+
+	userEntity := &entity.UserEntity{}
+	filter := bson.D{
+		{Key: "email", Value: email},
+		{Key: "password", Value: password},
+	}
+	err := collection.FindOne(context.Background(), filter).Decode(userEntity)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			errorMessage := "User or password invalid"
+			logger.Error(errorMessage, err, caller)
+			return nil, rest_err.NewForbiddenError(errorMessage)
+		}
+		errorMessage := "Error trying to find user by email and password"
+		logger.Error(errorMessage, err, caller)
 		return nil, rest_err.NewInternalServerError(errorMessage)
 	}
 	return converter.ConvertEntityToDomain(*userEntity), nil
