@@ -7,14 +7,19 @@ import (
 )
 
 type UserDomainService interface {
-	CreateUserServices(model.UserDomainInterface) (model.UserDomainInterface, *rest_err.Errors)
+	CreateUserServices(model.UserDomainInterface) (
+		model.UserDomainInterface, *rest_err.Errors,
+	)
 	UpdateUserServices(string, model.UserDomainInterface) *rest_err.Errors
 	FindUserByIDServices(id string) (model.UserDomainInterface, *rest_err.Errors)
 	FindUserByEmailServices(email string) (model.UserDomainInterface, *rest_err.Errors)
 	DeleteUserServices(userId string) *rest_err.Errors
+	LoginUserServices(userDomain model.UserDomainInterface) (
+		model.UserDomainInterface, *rest_err.Errors,
+	)
 }
 
-type userDomainService struct{
+type userDomainService struct {
 	userRepository repository.UserRepository
 }
 
