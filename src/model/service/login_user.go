@@ -7,13 +7,17 @@ import (
 
 func (u *userDomainService) LoginUserServices(
 	userDomain model.UserDomainInterface,
-) (model.UserDomainInterface, *rest_err.Errors) {
+) (string, *rest_err.Errors) {
 	userDomain.EncryptPassword()
 	user, err := u.userRepository.FindUserByEmailAndPassword(
 		userDomain.GetEmail(), userDomain.GetPassword(),
 	)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	return user, nil
+	token, err := user.GenerateToken()
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }

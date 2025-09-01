@@ -7,7 +7,6 @@ import (
 	"github.com/Alan-Gomes1/go-api/src/configuration/validation"
 	"github.com/Alan-Gomes1/go-api/src/controller/model/request"
 	"github.com/Alan-Gomes1/go-api/src/model"
-	"github.com/Alan-Gomes1/go-api/src/view"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -23,13 +22,11 @@ func (u *userControllerInterface) LoginUser(c *gin.Context) {
 	}
 
 	domain := model.NewUserLoginDomain(userRequest.Email, userRequest.Password)
-	domainResult, err := u.service.LoginUserServices(domain)
+	token, err := u.service.LoginUserServices(domain)
 	if err != nil {
 		logger.Error("Error trying to call LoginUserServices", err, caller)
 		c.JSON(err.Code, err)
 		return
 	}
-	userID := zap.String("userID", domainResult.GetID())
-	logger.Info("Successful connected user", userID, caller)
-	c.JSON(http.StatusOK, view.ConvertDomainToResponse(domainResult))
+	c.JSON(http.StatusOK, gin.H{"access_token": "Bearer " + token})
 }
