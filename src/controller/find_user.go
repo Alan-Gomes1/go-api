@@ -6,6 +6,7 @@ import (
 
 	"github.com/Alan-Gomes1/go-api/src/configuration/logger"
 	"github.com/Alan-Gomes1/go-api/src/configuration/rest_err"
+	"github.com/Alan-Gomes1/go-api/src/model"
 	"github.com/Alan-Gomes1/go-api/src/view"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -15,6 +16,12 @@ import (
 func (u *userControllerInterface) FindUserById(c *gin.Context) {
 	userId := c.Param("userId")
 	caller := zap.String("caller", "FindUserById")
+	token := c.Request.Header.Get("Authorization")
+	_, err := model.VerifyToken(token)
+	if err != nil {
+		c.JSON(err.Code, err)
+		return
+	}
 	if _, err := primitive.ObjectIDFromHex(userId); err != nil {
 		errorMessage := "Invalid user id"
 		logger.Error(errorMessage, err, caller)
@@ -35,6 +42,12 @@ func (u *userControllerInterface) FindUserById(c *gin.Context) {
 func (u *userControllerInterface) FindUserByEmail(c *gin.Context) {
 	userEmail := c.Param("userEmail")
 	caller := zap.String("caller", "FindUserByEmail")
+	token := c.Request.Header.Get("Authorization")
+	_, err := model.VerifyToken(token)
+	if err != nil {
+		c.JSON(err.Code, err)
+		return
+	}
 	if _, err := mail.ParseAddress(userEmail); err != nil {
 		errorMessage := "Invalid user email"
 		logger.Error(errorMessage, err, caller)
