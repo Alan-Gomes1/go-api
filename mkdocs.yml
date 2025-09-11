@@ -7,13 +7,6 @@ theme:
   name: material
   language: pt-BR
   palette:
-    # Paleta para modo claro
-    - scheme: default
-      primary: deep orange
-      accent: indigo
-      toggle:
-        icon: material/lightbulb
-        name: Mudar para o modo escuro
     # Paleta para modo escuro
     - scheme: slate
       primary: purple
@@ -21,8 +14,14 @@ theme:
       toggle:
         icon: material/lightbulb-outline
         name: Mudar para o modo claro
+    # Paleta para modo claro
+    - scheme: default
+      primary: deep orange
+      accent: indigo
+      toggle:
+        icon: material/lightbulb
+        name: Mudar para o modo escuro
   features:
-    - navigation.tabs
     - navigation.sections
     - toc.integrate
     - navigation.top
