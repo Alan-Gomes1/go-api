@@ -40,6 +40,11 @@ extra:
     - icon: fontawesome/brands/linkedin
       link: https://www.linkedin.com/in/seu-usuario/
 
+nav:
+  - Início: index.md
+  - Guia: guide.md
+  - Arquitetura: architecture.md
+
 markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
