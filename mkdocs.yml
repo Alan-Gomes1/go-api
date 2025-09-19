@@ -16,7 +16,7 @@ theme:
         name: Mudar para o modo claro
     # Paleta para modo claro
     - scheme: default
-      primary: deep orange
+      primary: cyan
       accent: indigo
       toggle:
         icon: material/lightbulb
