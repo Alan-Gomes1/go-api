@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/Alan-Gomes1/go-api/src/configuration/rest_err"
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 )
 
@@ -32,11 +33,9 @@ func (u *userDomain) GenerateToken() (string, *rest_err.Errors) {
 	return signedToken, nil
 }
 
-func VerifyToken(tokenValue string) (UserDomainInterface, *rest_err.Errors) {
+func VerifyTokenMIddleware(c *gin.Context) {
 	secret := os.Getenv(SECRET_KEY_JWT)
-	if tokenValue == "" {
-		return nil, rest_err.NewBadRequestError("invalid token")
-	}
+	tokenValue := c.Request.Header.Get("Authorization")
 
 	newToken := RemoveBearerPrefix(tokenValue)
 	token, err := jwt.Parse(newToken, func(t *jwt.Token) (interface{}, error) {
@@ -47,21 +46,19 @@ func VerifyToken(tokenValue string) (UserDomainInterface, *rest_err.Errors) {
 	})
 
 	if err != nil {
-		return nil, rest_err.NewUnauthorizedError("invalid token")
+		restErr := rest_err.NewUnauthorizedError("invalid token")
+		c.JSON(restErr.Code, restErr)
+		c.Abort()
+		return
 	}
 
-	claims, ok := token.Claims.(jwt.MapClaims)
+	_, ok := token.Claims.(jwt.MapClaims)
 	if !ok || !token.Valid {
-		return nil, rest_err.NewUnauthorizedError("invalid token")
+		restErr := rest_err.NewUnauthorizedError("invalid token")
+		c.JSON(restErr.Code, restErr)
+		c.Abort()
+		return
 	}
-
-	user := &userDomain{
-		id:    claims["id"].(string),
-		email: claims["email"].(string),
-		name:  claims["name"].(string),
-		age:   int8(claims["age"].(float64)),
-	}
-	return user, nil
 }
 
 func RemoveBearerPrefix(token string) string {
