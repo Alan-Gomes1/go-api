@@ -40,4 +40,16 @@ func TestUserRepository_CreateUser(t *testing.T) {
 		assert.EqualValues(t, userDomain.GetAge(), domain.GetAge())
 		assert.EqualValues(t, userDomain.GetPassword(), domain.GetPassword())
 	})
+
+	mtestDB.Run("error", func(mt *mtest.T) {
+		mt.AddMockResponses(bson.D{{Key: "ok", Value: 0}})
+
+		databaseMock := mt.Client.Database(databaseName)
+		repo := NewUserRepository(databaseMock)
+		domain := model.NewUserDomain("test@example.com", "test", "jhon", 18)
+		userDomain, err := repo.CreateUser(domain)
+
+		assert.NotNil(t, err)
+		assert.Nil(t, userDomain)
+	})
 }
