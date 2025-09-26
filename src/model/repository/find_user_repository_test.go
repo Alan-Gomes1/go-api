@@ -48,6 +48,29 @@ func TestUserRepository_FindUserByEmail(t *testing.T) {
 		assert.EqualValues(t, userDomain.GetAge(), userEntity.Age)
 		assert.EqualValues(t, userDomain.GetPassword(), userEntity.Password)
 	})
+
+	mtestDB.Run("error", func(mt *mtest.T) {
+		mt.AddMockResponses(bson.D{{Key: "ok", Value: 0}})
+
+		databaseMock := mt.Client.Database(databaseName)
+		repo := NewUserRepository(databaseMock)
+		userDomain, err := repo.FindUserByEmail("test@example.com")
+
+		assert.NotNil(t, err)
+		assert.Nil(t, userDomain)
+	})
+
+	mtestDB.Run("not_found", func(mt *mtest.T) {
+		ns := fmt.Sprintf("%s.%s", databaseName, collectionName)
+		mt.AddMockResponses(mtest.CreateCursorResponse(0, ns, mtest.FirstBatch))
+
+		databaseMock := mt.Client.Database(databaseName)
+		repo := NewUserRepository(databaseMock)
+		userDomain, err := repo.FindUserByEmail("test@example.com")
+
+		assert.NotNil(t, err)
+		assert.Nil(t, userDomain)
+	})
 }
 
 func convertEntityToBson(userEntity entity.UserEntity) bson.D {
