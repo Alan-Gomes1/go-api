@@ -31,4 +31,14 @@ func TestUserRepository_DeleteUser(t *testing.T) {
 
 		assert.Nil(t, err)
 	})
+
+	mtestDB.Run("error", func(mt *mtest.T) {
+		mt.AddMockResponses(bson.D{{Key: "ok", Value: 0}})
+
+		databaseMock := mt.Client.Database(databaseName)
+		repo := NewUserRepository(databaseMock)
+		err := repo.DeleteUser("abc123")
+
+		assert.NotNil(t, err)
+	})
 }
