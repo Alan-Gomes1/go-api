@@ -34,4 +34,14 @@ func TestUserRepository_UpdateUser(t *testing.T) {
 		err := repo.UpdateUser(domain.GetID(), domain)
 		assert.Nil(t, err)
 	})
+
+	mtestDB.Run("error", func(mt *mtest.T) {
+		mt.AddMockResponses(bson.D{{Key: "ok", Value: 0}})
+
+		databaseMock := mt.Client.Database(databaseName)
+		repo := NewUserRepository(databaseMock)
+		domain := model.NewUserDomain("test@example.com", "test", "jhon", 18)
+		err := repo.UpdateUser(domain.GetID(), domain)
+		assert.NotNil(t, err)
+	})
 }
