@@ -3,6 +3,7 @@ package service
 import (
 	"testing"
 
+	"github.com/Alan-Gomes1/go-api/src/configuration/rest_err"
 	"github.com/Alan-Gomes1/go-api/src/model"
 	"github.com/Alan-Gomes1/go-api/src/tests/mocks"
 	"github.com/stretchr/testify/assert"
@@ -25,5 +26,18 @@ func TestFindUserByIDServices(t *testing.T) {
 
 		assert.Nil(t, err)
 		assert.Equal(t, userDomain, user)
+	})
+
+	t.Run("error", func(t *testing.T) {
+		id := primitive.NewObjectID().Hex()
+		notFound := "user not found"
+		repository.EXPECT().FindUserByID(id).Return(
+			nil, rest_err.NewNotFoundError(notFound),
+		)
+		user, err := service.FindUserByIDServices(id)
+
+		assert.Nil(t, user)
+		assert.NotNil(t, err)
+		assert.EqualValues(t, notFound, err.Message)
 	})
 }
