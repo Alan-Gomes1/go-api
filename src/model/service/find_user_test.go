@@ -41,3 +41,22 @@ func TestFindUserByIDServices(t *testing.T) {
 		assert.EqualValues(t, notFound, err.Message)
 	})
 }
+
+func TestFindUserEmailIDServices(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	repository := mocks.NewMockUserRepository(ctrl)
+	service := NewUserDomainService(repository)
+
+	t.Run("success", func(t *testing.T) {
+		id := primitive.NewObjectID().Hex()
+		email := "test@email.com"
+		userDomain := model.NewUserDomain(email, "test", "jhon", 18)
+		userDomain.SetID(id)
+		repository.EXPECT().FindUserByEmail(email).Return(userDomain, nil)
+		user, err := service.FindUserByEmailServices(email)
+		assert.Nil(t, err)
+		assert.Equal(t, userDomain, user)
+	})
+}
