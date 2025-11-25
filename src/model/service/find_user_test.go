@@ -42,7 +42,7 @@ func TestFindUserByIDServices(t *testing.T) {
 	})
 }
 
-func TestFindUserEmailIDServices(t *testing.T) {
+func TestFindUserByEmailServices(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -58,5 +58,18 @@ func TestFindUserEmailIDServices(t *testing.T) {
 		user, err := service.FindUserByEmailServices(email)
 		assert.Nil(t, err)
 		assert.Equal(t, userDomain, user)
+	})
+
+	t.Run("error", func(t *testing.T) {
+		email := "test@email.com"
+		notFound := "user not found"
+		repository.EXPECT().FindUserByEmail(email).Return(
+			nil, rest_err.NewNotFoundError(notFound),
+		)
+		user, err := service.FindUserByEmailServices(email)
+
+		assert.Nil(t, user)
+		assert.NotNil(t, err)
+		assert.EqualValues(t, notFound, err.Message)
 	})
 }
